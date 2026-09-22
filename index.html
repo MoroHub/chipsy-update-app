@@ -9,8 +9,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#07060B" id="metaThemeColor">
 
-<!-- سيتم توليد الـ Manifest والأيقونة كـ PNG ديناميكياً لحل مشكلة الويندوز -->
-<link rel="manifest" id="dynamicManifest">
+<link rel="manifest" href="./manifest.json">
 
 <title>شيبسى | Pro 2026</title>
 
@@ -709,7 +708,6 @@
         if(el) el.classList.toggle('selected');
     };
 
-    // إلغاء تحديد فوري وبدون تأكيد
     window.deselectAll = () => {
         triggerHaptic(30);
         shortagesMap = {};
@@ -1127,55 +1125,15 @@
     
     get('chipsy_ultimate_bg').then(savedBg => { if (savedBg) document.body.style.backgroundImage = `url('${savedBg}')`; }).catch(err => {});
 
-    // ================= PWA Setup (Auto Generate Manifest & SW) =================
-    if ('serviceWorker' in navigator) {
-        // 1. توليد أيقونة PNG عن طريق Canvas للويندوز
-        const generateAppIcon = () => {
-            const canvas = document.createElement('canvas');
-            canvas.width = 512; canvas.height = 512;
-            const ctx = canvas.getContext('2d');
-            ctx.fillStyle = '#E8B84B';
-            ctx.beginPath(); ctx.roundRect(0, 0, 512, 512, 120); ctx.fill();
-            ctx.fillStyle = '#07060B';
-            ctx.font = 'bold 280px "Tajawal", Arial';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText('ش', 256, 300);
-            return canvas.toDataURL('image/png');
-        };
-
-        // 2. إنشاء وتفعيل الـ Manifest
-        const manifestData = {
-          name: "شيبسى Pro",
-          short_name: "Chipsy",
-          start_url: window.location.href.split('?')[0],
-          display: "standalone",
-          background_color: "#07060B",
-          theme_color: "#E8B84B",
-          icons: [{
-            src: generateAppIcon(),
-            sizes: "512x512",
-            type: "image/png",
-            purpose: "any maskable"
-          }]
-        };
-        const manifestBlob = new Blob([JSON.stringify(manifestData)], {type: 'application/json'});
-        document.getElementById('dynamicManifest').href = URL.createObjectURL(manifestBlob);
-
-        // 3. إنشاء وتفعيل Service Worker حقيقي لمتطلبات التثبيت
-        const swCode = `
-          const CACHE_NAME = 'chipsy-v1';
-          self.addEventListener('install', e => { self.skipWaiting(); });
-          self.addEventListener('activate', e => { self.clients.claim(); });
-          self.addEventListener('fetch', e => { 
-             e.respondWith(fetch(e.request).catch(() => new Response('Offline mode')));
-          });
-        `;
-        const swBlob = new Blob([swCode], {type: 'application/javascript'});
-        navigator.serviceWorker.register(URL.createObjectURL(swBlob)).catch(()=>{});
-    }
-
     startSession();
+
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('./sw.js')
+                .then(reg => console.log('SW Registered'))
+                .catch(err => console.error('SW Error', err));
+        });
+    }
 </script>
 </body>
 </html>
