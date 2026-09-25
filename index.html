@@ -356,7 +356,7 @@
   .sheet-cancel:active { color:var(--red); }
 
   /* ================= Manage Row ================= */
-  .manage-row { display:flex; align-items:center; gap:10px; background:var(--surface-2); border:1px solid var(--border); border-radius:14px; padding:10px 12px; margin-bottom:10px; transition:0.2s;}
+  .manage-row { display:flex; align-items:center; gap:10px; background:var(--surface-2); border:1px solid var(--border); border-radius:14px; padding:10px 12px; margin-bottom:10px; transition:background .2s, border-color .2s, opacity .2s;}
   .manage-row-disabled { opacity: 0.5; filter: grayscale(1); }
   /* ============== نقطة قبض احترافية للسحب — محسّنة خصيصًا للموبايل ==============
      المشكلة الأساسية فى سحب العناصر على اللمس عادة إن المتصفح بيحاول يعمل Scroll
@@ -380,9 +380,9 @@
   }
   .drag-handle:active { cursor: grabbing; opacity: 1; background: var(--primary-soft); color: var(--primary); }
   /* الحالة أثناء السحب الفعلى — العنصر "بيترفع" بصريًا فوق باقى القائمة */
-  .sortable-chosen { box-shadow: 0 12px 24px -6px var(--shadow), 0 0 0 1.5px var(--primary) !important; transform: scale(1.02); z-index: 5; position: relative; }
-  .sortable-ghost { opacity: 0.35; background: var(--primary-soft) !important; }
-  .sortable-drag { box-shadow: 0 16px 30px -6px rgba(0,0,0,.5) !important; }
+  .sortable-chosen { box-shadow: 0 12px 24px -6px var(--shadow), 0 0 0 1.5px var(--primary) !important; transform: scale(1.02); z-index: 5; position: relative; transition: box-shadow .15s, background .15s !important; }
+  .sortable-ghost { opacity: 0.35; background: var(--primary-soft) !important; transition: none !important; }
+  .sortable-drag, .sortable-fallback { box-shadow: 0 16px 30px -6px rgba(0,0,0,.5) !important; transition: none !important; will-change: transform; }
   
   .manage-input { flex:1; background:rgba(0,0,0,0.2); padding:8px 12px; border-radius:8px; border:1px solid var(--border); color:var(--text-1); font-family:inherit; font-weight:800; text-align:right; min-width:60px; outline:none; transition:0.2s;}
   .manage-input:focus { border-color:var(--primary); background:var(--surface-2); }
@@ -1214,6 +1214,8 @@
         new Sortable(area, {
             handle: '.cat-drag-handle', animation: 150,
             delay: 120, delayOnTouchOnly: true, touchStartThreshold: 5,
+            forceFallback: true, fallbackTolerance: 3, fallbackClass: 'sortable-fallback',
+            scroll: true, scrollSensitivity: 90, scrollSpeed: 14,
             ghostClass: 'sortable-ghost', chosenClass: 'sortable-chosen', dragClass: 'sortable-drag',
             disabled: sq !== "", 
             onStart: () => triggerHaptic(35),
@@ -1293,6 +1295,8 @@
             new Sortable(listArea, { 
                 handle: '.drag-handle', animation: 150, 
                 delay: 120, delayOnTouchOnly: true, touchStartThreshold: 5,
+                forceFallback: true, fallbackTolerance: 3, fallbackClass: 'sortable-fallback',
+                scroll: true, scrollSensitivity: 90, scrollSpeed: 14,
                 ghostClass: 'sortable-ghost', chosenClass: 'sortable-chosen', dragClass: 'sortable-drag',
                 onStart: () => triggerHaptic(35),
                 onEnd: async () => { 
